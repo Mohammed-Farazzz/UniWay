@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UniWay — Campus Navigator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080C12;
+      --surface: #0E1420;
+      --card: #131B29;
+      --border: rgba(255,255,255,0.07);
+      --accent: #3B82F6;
+      --accent2: #06B6D4;
+      --green: #10B981;
+      --text: #F1F5F9;
+      --muted: #64748B;
+      --subtle: #94A3B8;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND GRID ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── GLOW ORBS ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.25;
+    }
+    .orb1 { width: 600px; height: 600px; background: #1D4ED8; top: -200px; left: -200px; animation: drift1 12s ease-in-out infinite alternate; }
+    .orb2 { width: 500px; height: 500px; background: #0891B2; bottom: -150px; right: -150px; animation: drift2 15s ease-in-out infinite alternate; }
+    .orb3 { width: 300px; height: 300px; background: #10B981; top: 40%; left: 50%; transform: translate(-50%, -50%); animation: drift3 10s ease-in-out infinite alternate; opacity: 0.12; }
+
+    @keyframes drift1 { from { transform: translate(0,0); } to { transform: translate(80px, 60px); } }
+    @keyframes drift2 { from { transform: translate(0,0); } to { transform: translate(-60px, -80px); } }
+    @keyframes drift3 { from { transform: translate(-50%,-50%) scale(1); } to { transform: translate(-50%,-50%) scale(1.3); } }
+
+    /* ── LAYOUT ── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 48px;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff 40%, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .nav-badge {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--accent2);
+      border: 1px solid rgba(6,182,212,0.3);
+      padding: 4px 12px;
+      border-radius: 100px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 100px 0 60px;
+      text-align: center;
+    }
+
+    .hero-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.25);
+      color: var(--green);
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 32px;
+      letter-spacing: 0.04em;
+      animation: fadeUp 0.6s ease both;
+    }
+    .chip-dot {
+      width: 7px; height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.4); } }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      margin-bottom: 20px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--subtle);
+      max-width: 480px;
+      margin: 0 auto 48px;
+      line-height: 1.7;
+      font-weight: 300;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    /* ── DOWNLOAD BUTTON ── */
+    .download-wrap {
+      animation: fadeUp 0.6s 0.3s ease both;
+      margin-bottom: 56px;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
+      padding: 18px 40px;
+      border-radius: 16px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 40px rgba(59,130,246,0.35), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .btn-download::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .btn-download:hover { transform: translateY(-3px); box-shadow: 0 0 60px rgba(59,130,246,0.5), 0 16px 40px rgba(0,0,0,0.5); }
+    .btn-download:hover::before { opacity: 1; }
+    .btn-download:active { transform: translateY(0); }
+
+    .btn-icon {
+      width: 28px; height: 28px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .btn-meta {
+      font-size: 0.72rem;
+      color: rgba(241,245,249,0.65);
+      margin-top: 12px;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── STATS ROW ── */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 80px;
+      animation: fadeUp 0.6s 0.4s ease both;
+      flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-val {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.6rem;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+    .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 2px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+    /* ── FEATURES ── */
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      letter-spacing: -0.03em;
+      text-align: center;
+      margin-bottom: 48px;
+      color: var(--text);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 80px;
+    }
+
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 24px;
+      transition: border-color 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(59,130,246,0.4), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feature-card:hover { border-color: rgba(59,130,246,0.3); transform: translateY(-4px); }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .feature-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .feature-desc {
+      font-size: 0.875rem;
+      color: var(--subtle);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    /* ── INSTALL STEPS ── */
+    .steps-section {
+      margin-bottom: 80px;
+    }
+
+    .steps-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .steps-card::after {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(59,130,246,0.08), transparent 70%);
+      pointer-events: none;
+    }
+
+    .steps-list { list-style: none; }
+    .step-item {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .step-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .step-item:first-child { padding-top: 0; }
+
+    .step-num {
+      min-width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .step-content {}
+    .step-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--subtle);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+    .step-desc code {
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.2);
+      color: var(--accent2);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ── WARNING BANNER ── */
+    .warning-banner {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: rgba(234,179,8,0.06);
+      border: 1px solid rgba(234,179,8,0.2);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-top: 24px;
+    }
+    .warning-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+    .warning-text { font-size: 0.85rem; color: #FCD34D; line-height: 1.6; font-weight: 300; }
+    .warning-text strong { font-weight: 600; }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    footer span { color: var(--subtle); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      nav { padding: 20px 24px; }
+      .steps-card { padding: 24px 20px; }
+      .stats { gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">UniWay</div>
+    <div class="nav-badge">v1.0.0 · Android</div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="wrapper">
+    <section class="hero">
+      <div class="hero-chip">
+        <span class="chip-dot"></span>
+        Now Available · Free Download
+      </div>
+
+      <h1>Your campus,<br/><span>your way.</span></h1>
+
+      <p class="hero-sub">
+        Navigate your university campus effortlessly with QR-based location anchors, step-by-step directions, and immersive AR guidance.
+      </p>
+
+      <div class="download-wrap">
+        <a href="https://expo.dev/artifacts/eas/nbt6SF4LxHrHZSsBqaRnWH.apk" class="btn-download" id="downloadBtn">
+          <span class="btn-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </span>
+          Download UniWay APK
+        </a>
+        <div class="btn-meta">Android only · ~50MB · No Play Store needed</div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-val">QR</div>
+          <div class="stat-label">Location Anchors</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">AR</div>
+          <div class="stat-label">Navigation Mode</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">🎙️</div>
+          <div class="stat-label">Voice Guidance</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">100%</div>
+          <div class="stat-label">Offline Ready</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="reveal" style="margin-bottom:80px;">
+      <div class="section-label">Features</div>
+      <div class="section-title">Everything you need to navigate</div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <span class="feature-icon">📱</span>
+          <div class="feature-title">QR Code Scanning</div>
+          <div class="feature-desc">Scan campus QR codes placed around the university to instantly pinpoint your exact location.</div>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🗺️</span>
+          <div class="feature-title">Step-by-Step Directions</div>
+          <div class="feature-desc">Get clear, turn-by-turn walking directions from any campus location to your destination.</div>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🔮</span>
+          <div class="feature-title">AR Navigation</div>
+          <div class="feature-desc">Point your camera and follow 3D directional arrows overlaid on the real world using your compass.</div>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🔊</span>
+          <div class="feature-title">Voice Guidance</div>
+          <div class="feature-desc">Hands-free navigation with spoken turn-by-turn instructions so you can walk without watching the screen.</div>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">⚡</span>
+          <div class="feature-title">Works Offline</div>
+          <div class="feature-desc">The entire campus map is stored on your device — no internet needed once installed.</div>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">♿</span>
+          <div class="feature-title">Accessible Routes</div>
+          <div class="feature-desc">Toggle accessible-only routing to find paths without stairs or difficult terrain.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW TO INSTALL -->
+    <section class="steps-section reveal">
+      <div class="section-label">Installation</div>
+      <div class="section-title">Get it on your phone in 4 steps</div>
+
+      <div class="steps-card">
+        <ul class="steps-list">
+          <li class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Download the APK</div>
+              <div class="step-desc">Tap the Download button above. Your browser will download the <code>UniWay.apk</code> file to your phone.</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">Allow installation from unknown sources</div>
+              <div class="step-desc">Go to <code>Settings → Security</code> and enable <code>Install Unknown Apps</code>. On newer Android, it may ask you when you tap the file — just tap Allow.</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">Open the APK and install</div>
+              <div class="step-desc">Open your <code>Downloads</code> folder, tap <code>UniWay.apk</code>, and tap Install. It takes about 10 seconds.</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <div class="step-title">Launch UniWay and grant permissions</div>
+              <div class="step-desc">Open the app, grant Camera and Location permissions when asked, then scan any campus QR code to start navigating!</div>
+            </div>
+          </li>
+        </ul>
+
+        <div class="warning-banner">
+          <span class="warning-icon">⚠️</span>
+          <div class="warning-text">
+            <strong>Android only.</strong> This APK works on Android 8.0 and above. iPhone users cannot install APK files — iOS is not supported at this time.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /wrapper -->
+
+  <!-- FOOTER -->
+  <footer>
+    <span>UniWay Campus Navigator</span> · Built with React Native & Expo · v1.0.0
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Download button click feedback
+    document.getElementById('downloadBtn').addEventListener('click', function(e) {
+      if (this.href.includes('YOUR_APK_DOWNLOAD_LINK_HERE')) {
+        e.preventDefault();
+        alert('APK link coming soon!');
+        return;
+      }
+      this.innerHTML = `
+        <span class="btn-icon">✓</span>
+        Downloading...
+      `;
+      setTimeout(() => {
+        this.innerHTML = `
+          <span class="btn-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </span>
+          Download UniWay APK
+        `;
+      }, 3000);
+    });
+  </script>
+</body>
+</html>
